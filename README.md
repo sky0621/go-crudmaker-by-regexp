@@ -1,0 +1,1 @@
+# go-crudmaker-by-regexp
