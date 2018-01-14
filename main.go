@@ -91,7 +91,7 @@ func main() {
 
 	outputBuf = &bytes.Buffer{}
 	defer outputBuf.Reset()
-	outputBuf.WriteString(fmt.Sprintf("# 管理画面及びPHPバッチのCRUD(%v 時点)\n\n", time.Now().Format("2006-01-02 15:04")))
+	outputBuf.WriteString(fmt.Sprintf("# 管理画面及びPHPバッチのサービス使用一覧(%v 時点)\n\n", time.Now().Format("2006-01-02 15:04")))
 	outputBuf.WriteString("#### ※ツール（ https://github.com/sky0621/go-crudmaker-by-regexp ）による自動生成\n\n")
 	outputBuf.WriteString("#### ・「controller」層、「batch」層から直接「service」層を呼んでいるケースのみ想定\n\n")
 	outputBuf.WriteString("#### ・CRUDの判定については「service」層のメソッドが「get〜〜」なら「READのR」、「insert」を含むなら「CREATEのC」といった恣意的なレベル\n\n")
@@ -184,6 +184,9 @@ func Apply(path string, info os.FileInfo, err error) error {
 			// fmt.Printf("[Service_Aws_Sqs] %s\n", txt2)
 		}
 		if !strings.Contains(txt2, Service_AWS) && strings.Contains(txt2, Service_RDB) {
+			ba := strings.Split(txt2, "::")
+			ba2 := strings.Split(ba[0], " ")
+			outputBuf.WriteString(fmt.Sprintf("[RDS] %v\n\n", strings.Replace(ba2[len(ba2)-1], "Service_", "", -1)))
 			// fmt.Printf("[Service_RDB] %s\n", txt2)
 		}
 	}
