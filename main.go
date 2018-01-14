@@ -45,6 +45,7 @@ const (
 
 	Service_RDB = "Service_"
 	Service_AWS = "Service_Aws_"
+	Service_TD  = "Service_TD"
 )
 
 type Result struct {
@@ -94,7 +95,7 @@ func main() {
 	outputBuf.WriteString(fmt.Sprintf("# 管理画面及びPHPバッチのサービス使用一覧(%v 時点)\n\n", time.Now().Format("2006-01-02 15:04")))
 	outputBuf.WriteString("#### ※ツール（ https://github.com/sky0621/go-crudmaker-by-regexp ）による自動生成\n\n")
 	outputBuf.WriteString("#### ・「controller」層、「batch」層から直接「service」層を呼んでいるケースのみ想定\n\n")
-	outputBuf.WriteString("#### ・CRUDの判定については「service」層のメソッドが「get〜〜」なら「READのR」、「insert」を含むなら「CREATEのC」といった恣意的なレベル\n\n")
+	// outputBuf.WriteString("#### ・CRUDの判定については「service」層のメソッドが「get〜〜」なら「READのR」、「insert」を含むなら「CREATEのC」といった恣意的なレベル\n\n")
 
 	err := filepath.Walk(target, Apply)
 	if err != nil {
@@ -124,10 +125,7 @@ func Apply(path string, info os.FileInfo, err error) error {
 	}
 
 	dispPath := strings.Replace(path, "/home/sasaki/work/go/src/oden.dac.co.jp/dialogone/sally/fuel/app/classes/", "", -1)
-	outputBuf.WriteString(fmt.Sprintf("##### %v\n\n", dispPath))
-	// fmt.Println("####################################################")
-	// fmt.Println(path)
-	// fmt.Println("####################################################")
+	outputBuf.WriteString(fmt.Sprintf("## <u><b>■ %v</b></u>\n\n", dispPath))
 
 	fp, err := os.Open(path)
 	if err != nil {
@@ -147,47 +145,44 @@ func Apply(path string, info os.FileInfo, err error) error {
 		// TODO 適当すぎ・・・
 
 		if strings.Contains(txt2, Service_Aws_DynamoDB) {
-			// if strings.Contains(path, "controller") {
-			// 	isFirstSvc := true
-			// 	for _, batchService := range batchServices {
-			// 		if batchService.Name == "DynamoDB" {
-			// 			isFirstSvc = false
-			// 			for _, table := range batchService.Tables {
-			// 				if strings.Contains(txt2, table.Name) {
-
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// 	if isFirstSvc {
-			// 		batchServices = append(batchServices, &ServiceAws{Name: "DynamoDB"})
-			// 	}
-			// }
-			// if strings.Contains(path, "batch") {
-
-			// }
 			ba := strings.Split(txt2, "::")
-			ba2 := strings.Split(ba[0], " ")
-			outputBuf.WriteString(fmt.Sprintf("[DynamoDB] %v\n\n", ba2[len(ba2)-1]))
-			// fmt.Printf("[Service_Aws_DynamoDB] %s\n", txt2)
+			ba2 := strings.Split(ba[1], "(")
+			outputBuf.WriteString(fmt.Sprintf("[DynamoDB] %v\n\n", ba2[0]))
 		}
 		if strings.Contains(txt2, Service_Aws_ElastiCache) {
-			// fmt.Printf("[Service_Aws_ElastiCache] %s\n", txt2)
+			ba := strings.Split(txt2, "::")
+			ba2 := strings.Split(ba[1], "(")
+			outputBuf.WriteString(fmt.Sprintf("[ElastiCache] %v\n\n", ba2[0]))
 		}
 		if strings.Contains(txt2, Service_Aws_Kms) {
-			// fmt.Printf("[Service_Aws_Kms] %s\n", txt2)
+			ba := strings.Split(txt2, "::")
+			ba2 := strings.Split(ba[1], "(")
+			outputBuf.WriteString(fmt.Sprintf("[KMS] %v\n\n", ba2[0]))
 		}
 		if strings.Contains(txt2, Service_Aws_S3) {
-			// fmt.Printf("[Service_Aws_S3] %s\n", txt2)
+			ba := strings.Split(txt2, "::")
+			ba2 := strings.Split(ba[1], "(")
+			outputBuf.WriteString(fmt.Sprintf("[S3] %v\n\n", ba2[0]))
 		}
 		if strings.Contains(txt2, Service_Aws_Sqs) {
-			// fmt.Printf("[Service_Aws_Sqs] %s\n", txt2)
+			ba := strings.Split(txt2, "::")
+			ba2 := strings.Split(ba[1], "(")
+			outputBuf.WriteString(fmt.Sprintf("[SQS] %v\n\n", ba2[0]))
 		}
-		if !strings.Contains(txt2, Service_AWS) && strings.Contains(txt2, Service_RDB) {
+		if strings.Contains(txt2, Service_TD) {
+			// ba := strings.Split(txt2, "::")
+			// ba2 := strings.Split(ba[1], "(")
+			outputBuf.WriteString(fmt.Sprintf("[TD(※該当行をそのまま表示)] %v\n\n", txt2))
+		}
+		if !strings.Contains(txt2, Service_AWS) && !strings.Contains(txt2, Service_TD) && strings.Contains(txt2, Service_RDB) {
 			ba := strings.Split(txt2, "::")
 			ba2 := strings.Split(ba[0], " ")
-			outputBuf.WriteString(fmt.Sprintf("[RDS] %v\n\n", strings.Replace(ba2[len(ba2)-1], "Service_", "", -1)))
-			// fmt.Printf("[Service_RDB] %s\n", txt2)
+			ba3 := []string{"<None>"}
+			if len(ba) > 1 {
+				ba3 = strings.Split(ba[1], "(")
+			}
+			svcName := strings.Replace(strings.Replace(ba2[len(ba2)-1], "Service_", "", -1), "(!", "", -1)
+			outputBuf.WriteString(fmt.Sprintf("[RDS(or その他サービス)] %v (%v)\n\n", svcName, ba3[0]))
 		}
 	}
 
