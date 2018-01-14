@@ -1,0 +1,5 @@
+package: github.com/sky0621/go-testcode-autogen/example/sampleproject
+import:
+- package: github.com/Sirupsen/logrus
+  version: ~0.11.5
+- package: github.com/spf13/viper
