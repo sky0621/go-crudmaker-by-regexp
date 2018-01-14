@@ -1,4 +1,0 @@
-LABEL,STEP,COMMENT
-total,{{.TotalStep}},{{.TotalComment}}
-{{range .FileStepCounters}}{{.FilePath}},{{.Step}},{{.Comment}}
-{{end}}
